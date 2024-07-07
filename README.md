@@ -21,6 +21,7 @@ Esta é uma API em Node.js para login, autenticação de usuários, cadastro de 
      - /middlewares
      - /routes
   - /database
+  - /helpers
   - /services
   - /utils
 - .env

@@ -1,10 +1,10 @@
-const express = require("express");
-const router  = express.Router();
+import express from 'express';
+import categoryController from '../controllers/categoryController';
+import loginController from '../controllers/loginController';
+import productController from '../controllers/productController';
+import loginAuth from '../middlewares/loginAuth';
 
-const categoryController = require('../controllers/categoryController');
-const loginController    = require('../controllers/loginController');
-const productController  = require('../controllers/productController');
-const loginAuth          = require('../middlewares/loginAuth.js');
+const router = express.Router();
 
 // Unauthenticated Routes
 router.post('/login', async (req, res, next) => {
@@ -130,4 +130,4 @@ router.put('/product/category', loginAuth.auth, async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

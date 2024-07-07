@@ -1,18 +1,12 @@
+import crypto from 'crypto';
 
-const crypto = require('crypto');
-
-function createMD5Hash(string) {
+export function createMD5Hash(string: string): string {
   const hash = crypto.createHash('md5');
   hash.update(string);
   return hash.digest('hex');
 }
 
-function comparePassword(normalString, md5String) {
+export function comparePassword(normalString: string, md5String: string): boolean {
   const md5NormalString = createMD5Hash(normalString);
   return md5NormalString === md5String;
 }
-
-module.exports = {
-  createMD5Hash,
-  comparePassword
-};

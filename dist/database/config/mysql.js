@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const config = {
     db: {
         host: 'localhost',
@@ -9,6 +11,5 @@ const config = {
         connectTimeout: 60000
     },
     listPerPage: 10,
-  };
-  
-  module.exports = config;
+};
+exports.default = config;
