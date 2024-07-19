@@ -1,5 +1,5 @@
 import db from './dbService';
-import helper from '../helpers/helper';
+import { QueryResult } from 'pg';
 
 interface ProductData {
   id?: number;
@@ -9,73 +9,90 @@ interface ProductData {
   category_id?: number;
 }
 
-async function addProduct(productData: ProductData): Promise<any> {
-  const category_id = productData.category_id !== (undefined || '') ? productData.category_id : null;
-
-  const sql = "INSERT INTO products (title, description, price, category_id, owner_id) VALUES (?, ?, ?, ?, ?)";
+async function addProduct(productData: ProductData): Promise<ProductData | null> {
+  const category_id = productData.category_id !== undefined ? productData.category_id : null;
+  const sql = "INSERT INTO products (title, description, price, category_id, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING *";
   const values = [productData.title, productData.description, productData.price, category_id, global.loggedInUserId];
-  const rows = await db.query(sql, values);
-
-  const insertId = rows.insertId;
-  const insertedProduct = await findProductById(insertId);
-  return insertedProduct;
+  try {
+    const { rows }: QueryResult = await db.query(sql, values);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error adding product:', error);
+    return null;
+  }
 }
 
-async function deleteProduct(productId: number): Promise<any> {
-  const sql = "DELETE FROM products WHERE id = ?";
-  const rows = await db.query(sql, [productId]);
-  const data = helper.emptyOrRows(rows);
-
-  return data;
+async function deleteProduct(productId: number): Promise<ProductData | null> {
+  const sql = "DELETE FROM products WHERE id = $1 RETURNING *";
+  try {
+    const { rows }: QueryResult = await db.query(sql, [productId]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return null;
+  }
 }
 
-async function findAllProducts(categoryFlag: boolean | null = null): Promise<any> {
+async function findAllProducts(categoryFlag: boolean | null = null): Promise<ProductData[]> {
   let sql = "SELECT id, title, description, price, category_id, owner_id, created_at, updated_at FROM products WHERE category_id IS NOT NULL";
   if (categoryFlag) {
     sql = "SELECT id, title, description, price, category_id, owner_id, created_at, updated_at FROM products WHERE category_id IS NULL";
   }
-  const rows = await db.query(sql);
-  const data = helper.emptyOrRows(rows);
-
-  return data;
+  try {
+    const { rows }: QueryResult = await db.query(sql);
+    return rows;
+  } catch (error) {
+    console.error('Error finding all products:', error);
+    return [];
+  }
 }
 
-async function findProductById(productId: number): Promise<any> {
-  const sql = "SELECT id, title, description, price, category_id, owner_id, created_at, updated_at FROM products WHERE id = ?";
-  const rows = await db.query(sql, [productId]);
-  const data = helper.emptyOrRows(rows);
-
-  return data;
+async function findProductById(productId: number): Promise<ProductData | null> {
+  const sql = "SELECT id, title, description, price, category_id, owner_id, created_at, updated_at FROM products WHERE id = $1";
+  try {
+    const { rows }: QueryResult = await db.query(sql, [productId]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error finding product by ID:', error);
+    return null;
+  }
 }
 
-async function findProductByTitle(productTitle: string): Promise<any> {
-  const sql = "SELECT id, title, description, price, category_id, owner_id, created_at, updated_at FROM products WHERE title = ?";
-  const rows = await db.query(sql, [productTitle]);
-  const data = helper.emptyOrRows(rows);
-
-  return data;
+async function findProductByTitle(productTitle: string): Promise<ProductData | null> {
+  const sql = "SELECT id, title, description, price, category_id, owner_id, created_at, updated_at FROM products WHERE title = $1";
+  try {
+    const { rows }: QueryResult = await db.query(sql, [productTitle]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error finding product by title:', error);
+    return null;
+  }
 }
 
-async function updateProduct(fields: string[], values: any[], id: number): Promise<any> {
-  const sql = `UPDATE products SET ${fields.join(', ')} WHERE id = ?`;
-  const rows = await db.query(sql, values);
-  const data = helper.emptyOrRows(rows);
-
-  const updatedProduct = await findProductById(id);
-  return updatedProduct;
+async function updateProduct(fields: string[], values: any[], id: number): Promise<ProductData | null> {
+  const sql = `UPDATE products SET ${fields.join(', ')} WHERE id = $1 RETURNING *`;
+  try {
+    const { rows }: QueryResult = await db.query(sql, [...values, id]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error updating product:', error);
+    return null;
+  }
 }
 
-async function updateProductCategory(productData: ProductData): Promise<any> {
-  const sql = "UPDATE products SET category_id = ? WHERE id = ?";
+async function updateProductCategory(productData: ProductData): Promise<ProductData | null> {
+  const sql = "UPDATE products SET category_id = $1 WHERE id = $2 RETURNING *";
   const values = [productData.category_id, productData.id];
-  const rows = await db.query(sql, values);
-  const data = helper.emptyOrRows(rows);
-
-  const updatedProduct = await findProductById(productData.id);
-  return updatedProduct;
+  try {
+    const { rows }: QueryResult = await db.query(sql, values);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error updating product category:', error);
+    return null;
+  }
 }
 
-export default {
+export {
   addProduct,
   deleteProduct,
   findAllProducts,

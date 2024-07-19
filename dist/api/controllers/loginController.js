@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,19 +35,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = login;
-exports.register = register;
+exports.register = exports.login = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const md5_1 = __importDefault(require("../../utils/md5"));
+const md5 = __importStar(require("../../utils/md5"));
 const userService_1 = require("../../services/userService");
 dotenv_1.default.config();
 const SECRET = process.env.SECRET;
 function login(req) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         let user = req.body.username;
         const data = yield (0, userService_1.findUserByUsername)(user);
-        if (data.length === 0) {
+        if (data === null) {
             let response = {
                 statusCode: 401,
                 message: "Usuário não encontrado!",
@@ -34,7 +57,7 @@ function login(req) {
             };
             return response;
         }
-        const validatePassword = md5_1.default.comparePassword(req.body.password, data[0].password);
+        const validatePassword = md5.comparePassword(req.body.password, data.password);
         if (!validatePassword) {
             let response = {
                 statusCode: 401,
@@ -42,8 +65,8 @@ function login(req) {
             };
             return response;
         }
-        const token = jsonwebtoken_1.default.sign({ user: req.body.user, idUser: data[0].id }, SECRET, { expiresIn: "20m" });
-        global.loggedInUserId = data[0].id;
+        const token = jsonwebtoken_1.default.sign({ user: req.body.user, idUser: data.id }, SECRET, { expiresIn: "20m" });
+        global.loggedInUserId = (_a = data.id) !== null && _a !== void 0 ? _a : null;
         let response = {
             statusCode: 200,
             message: "Login realizado com sucesso!",
@@ -54,11 +77,12 @@ function login(req) {
         return response;
     });
 }
+exports.login = login;
 function register(req) {
     return __awaiter(this, void 0, void 0, function* () {
         let user = req.body.username;
         let data = yield (0, userService_1.findUserByUsername)(user);
-        if (data.length !== 0) {
+        if (data !== null) {
             let response = {
                 statusCode: 401,
                 message: "Nome de usuário se encontra em uso!",
@@ -70,7 +94,7 @@ function register(req) {
         }
         let email = req.body.email;
         data = yield (0, userService_1.findUserByEmail)(email);
-        if (data.length !== 0) {
+        if (data !== null) {
             let response = {
                 statusCode: 401,
                 message: "Email informado se encontra em uso!",
@@ -97,3 +121,4 @@ function register(req) {
         return response;
     });
 }
+exports.register = register;

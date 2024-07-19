@@ -12,10 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.add = add;
-exports.erase = erase;
-exports.list = list;
-exports.update = update;
+exports.update = exports.list = exports.erase = exports.add = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const categoryService_1 = require("../../services/categoryService");
 dotenv_1.default.config();
@@ -38,15 +35,15 @@ function add(req) {
             return response;
         }
         const title = req.body.title;
-        const data = yield (0, categoryService_1.findCategoryByTitle)(title);
-        if (data.length !== 0) {
+        var data = yield (0, categoryService_1.findCategoryByTitle)(title);
+        if (data && data !== null) {
             let response = {
                 statusCode: 401,
                 message: "Categoria já cadastrada no banco!",
                 data: {
-                    id: data[0].id,
-                    title: data[0].title,
-                    description: data[0].description
+                    id: data.id,
+                    title: data.title,
+                    description: data.description
                 }
             };
             return response;
@@ -64,11 +61,12 @@ function add(req) {
         return response;
     });
 }
+exports.add = add;
 function erase(req) {
     return __awaiter(this, void 0, void 0, function* () {
         const id = req.body.id;
         const data = yield (0, categoryService_1.findCategoryById)(id);
-        if (data.length === 0) {
+        if (data === null) {
             let response = {
                 statusCode: 401,
                 message: "Categoria inexistente!",
@@ -78,24 +76,24 @@ function erase(req) {
             };
             return response;
         }
-        const dataCategory = data[0];
         yield (0, categoryService_1.deleteCategory)(id);
         const response = {
             statusCode: 200,
             message: "Categoria excluída com sucesso!",
             body: {
-                category: dataCategory.id,
-                name: dataCategory.name,
-                description: dataCategory.description
+                category: data.id,
+                title: data.title,
+                description: data.description
             }
         };
         return response;
     });
 }
+exports.erase = erase;
 function list() {
     return __awaiter(this, void 0, void 0, function* () {
         const data = yield (0, categoryService_1.findAllCategories)();
-        if (data.length === 0) {
+        if (data === null) {
             let response = {
                 statusCode: 401,
                 message: "Não existem categorias cadastradas!"
@@ -112,6 +110,7 @@ function list() {
         return response;
     });
 }
+exports.list = list;
 function update(req) {
     return __awaiter(this, void 0, void 0, function* () {
         let productData = req.body;
@@ -134,11 +133,11 @@ function update(req) {
         }
         const id = req.body.id;
         const data = yield (0, categoryService_1.findCategoryById)(id);
-        if (data.length === 0) {
+        if (data === null) {
             let response = {
                 statusCode: 401,
                 message: "Categoria inexistente.",
-                data: {
+                body: {
                     id: req.body.id,
                     title: req.body.title,
                     description: req.body.description
@@ -146,17 +145,31 @@ function update(req) {
             };
             return response;
         }
-        productData.id = data[0].id;
+        productData.id = data.id;
         const updatedData = yield (0, categoryService_1.updateCategory)(productData);
-        const response = {
-            statusCode: 200,
-            message: "Categoria atualizada com sucesso!",
-            body: {
-                title: updatedData.title,
-                description: updatedData.description,
-                owner_id: updatedData.owner_id
-            }
-        };
+        if (updatedData && updatedData !== null) {
+            var response = {
+                statusCode: 200,
+                message: "Categoria atualizada com sucesso!",
+                body: {
+                    title: updatedData.title,
+                    description: updatedData.description,
+                    owner_id: updatedData.owner_id
+                }
+            };
+        }
+        else {
+            var response = {
+                statusCode: 401,
+                message: "Erro ao atualizar categoria!",
+                body: {
+                    id: req.body.id,
+                    title: req.body.title,
+                    description: req.body.description
+                }
+            };
+        }
         return response;
     });
 }
+exports.update = update;

@@ -1,18 +1,9 @@
 import dotenv from 'dotenv';
 import { Request } from 'express';
 import { findCategoryById } from '../../services/categoryService';
-import {
-  addProduct,
-  deleteProduct,
-  findAllProducts,
-  findProductById,
-  findProductByTitle,
-  updateProduct,
-  updateProductCategory
-} from '../../services/productService';
+import { addProduct, deleteProduct, findAllProducts, findProductById, findProductByTitle, updateProduct, updateProductCategory } from '../../services/productService';
 
 dotenv.config();
-const SECRET = process.env.SECRET as string;
 
 interface ProductData {
   id?: number;
@@ -23,16 +14,16 @@ interface ProductData {
 }
 
 async function add(req: Request<any, any, ProductData>) {
-  const productData = req.body;
+  const productData = req.body!;
   const emptyFields: string[] = [];
 
-  if (!productData.title) {
+  if (!req.body.title) {
     emptyFields.push('title');
   }
-  if (!productData.description) {
+  if (!req.body.description) {
     emptyFields.push('description');
   }
-  if (!productData.price) {
+  if (!req.body.price) {
     emptyFields.push('price');
   }
 
@@ -45,17 +36,23 @@ async function add(req: Request<any, any, ProductData>) {
     return response;
   }
 
-  let title = req.body.title;
+  let title = req.body.title! as string;
+
+  if (!title) {
+    // Lidar com o caso onde title é undefined
+    throw new Error('Title is required');
+  }
+
   let data = await findProductByTitle(title);
 
-  if (data.length !== 0) {
+  if (data !== null) {
     let response = {
       statusCode: 401,
       message: 'Produto já cadastrado no banco!',
       data: {
-        id: data[0].id,
-        title: data[0].title,
-        description: data[0].description
+        id: data.id,
+        title: data.title,
+        description: data.description
       }
     };
 
@@ -63,8 +60,7 @@ async function add(req: Request<any, any, ProductData>) {
   }
 
   data = await addProduct(productData);
-  data = data[0];
-
+  
   let response = {
     statusCode: 200,
     message: 'Produto adicionado com sucesso!',
@@ -115,15 +111,15 @@ async function category(req: Request<any, any, ProductData>) {
     return response;
   }
 
-  if (data[0].category_id) {
+  if (data.category_id) {
     let response = {
       statusCode: 401,
       message: 'Produto com categoria cadastrada.',
       data: {
-        id: data[0].id,
-        title: data[0].title,
-        description: data[0].description,
-        category_id: data[0].category_id
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        category_id: data.category_id
       }
     };
 
@@ -146,7 +142,7 @@ async function category(req: Request<any, any, ProductData>) {
   }
 
   data = await updateProductCategory(productData);
-  data = data[0];
+  data = data;
 
   let response = {
     statusCode: 200,
@@ -179,7 +175,7 @@ async function erase(req: Request<any, any, { id: number }>) {
     return response;
   }
 
-  let dataProduct = data[0];
+  let dataProduct = data;
 
   data = await deleteProduct(id);
 
@@ -249,7 +245,7 @@ async function register(req: Request<any, any, { username: string; password: str
   let user = req.body.username;
   let data = await findUserByUsername(user);
 
-  if (data.length !== 0) {
+  if (data !== null) {
     let response = {
       statusCode: 401,
       message: 'Nome de usuário se encontra em uso!',
@@ -264,7 +260,7 @@ async function register(req: Request<any, any, { username: string; password: str
   let email = req.body.email;
   data = await findUserByUsername(user);
 
-  if (data.length !== 0) {
+  if (data !== null) {
     let response = {
       statusCode: 401,
       message: 'Email informado se encontra em uso!',
@@ -326,7 +322,7 @@ async function update(req: Request<any, any, ProductData>) {
     return response;
   }
 
-  productData.id = data[0].id;
+  productData.id = data.id;
 
   const fields: string[] = [];
   const values: any[] = [];
@@ -359,7 +355,7 @@ async function update(req: Request<any, any, ProductData>) {
   values.push(productData.id);
 
   data = await updateProduct(fields, values, productData.id);
-  data = data[0];
+  data = data;
 
   let response = {
     statusCode: 200,

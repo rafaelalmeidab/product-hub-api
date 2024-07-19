@@ -14,7 +14,7 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use((0, express_session_1.default)({
-    secret: SECRET || 'default_secret', // Adiciona um valor padrão caso o SECRET não esteja definido
+    secret: SECRET || 'default_secret',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false } // Defina como true se estiver usando HTTPS
@@ -22,4 +22,8 @@ app.use((0, express_session_1.default)({
 global.loggedInUserId = null;
 app.use(express_1.default.json());
 app.use("", routes_1.default);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
 exports.default = app;

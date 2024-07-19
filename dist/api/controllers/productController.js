@@ -12,29 +12,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.add = add;
-exports.category = category;
-exports.erase = erase;
-exports.list = list;
-exports.list2 = list2;
-exports.register = register;
-exports.update = update;
+exports.update = exports.register = exports.list2 = exports.list = exports.erase = exports.category = exports.add = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const categoryService_1 = require("../../services/categoryService");
 const productService_1 = require("../../services/productService");
 dotenv_1.default.config();
-const SECRET = process.env.SECRET;
 function add(req) {
     return __awaiter(this, void 0, void 0, function* () {
         const productData = req.body;
         const emptyFields = [];
-        if (!productData.title) {
+        if (!req.body.title) {
             emptyFields.push('title');
         }
-        if (!productData.description) {
+        if (!req.body.description) {
             emptyFields.push('description');
         }
-        if (!productData.price) {
+        if (!req.body.price) {
             emptyFields.push('price');
         }
         if (emptyFields.length > 0) {
@@ -44,22 +37,26 @@ function add(req) {
             };
             return response;
         }
+        // let title = req.body.title! as string;
         let title = req.body.title;
+        if (!title) {
+            // Lidar com o caso onde title é undefined
+            throw new Error('Title is required');
+        }
         let data = yield (0, productService_1.findProductByTitle)(title);
-        if (data.length !== 0) {
+        if (data !== null) {
             let response = {
                 statusCode: 401,
                 message: 'Produto já cadastrado no banco!',
                 data: {
-                    id: data[0].id,
-                    title: data[0].title,
-                    description: data[0].description
+                    id: data.id,
+                    title: data.title,
+                    description: data.description
                 }
             };
             return response;
         }
         data = yield (0, productService_1.addProduct)(productData);
-        data = data[0];
         let response = {
             statusCode: 200,
             message: 'Produto adicionado com sucesso!',
@@ -74,6 +71,7 @@ function add(req) {
         return response;
     });
 }
+exports.add = add;
 function category(req) {
     return __awaiter(this, void 0, void 0, function* () {
         const productData = req.body;
@@ -103,15 +101,15 @@ function category(req) {
             };
             return response;
         }
-        if (data[0].category_id) {
+        if (data.category_id) {
             let response = {
                 statusCode: 401,
                 message: 'Produto com categoria cadastrada.',
                 data: {
-                    id: data[0].id,
-                    title: data[0].title,
-                    description: data[0].description,
-                    category_id: data[0].category_id
+                    id: data.id,
+                    title: data.title,
+                    description: data.description,
+                    category_id: data.category_id
                 }
             };
             return response;
@@ -129,7 +127,7 @@ function category(req) {
             return response;
         }
         data = yield (0, productService_1.updateProductCategory)(productData);
-        data = data[0];
+        data = data;
         let response = {
             statusCode: 200,
             message: 'Categoria associada a produto com sucesso!',
@@ -144,6 +142,7 @@ function category(req) {
         return response;
     });
 }
+exports.category = category;
 function erase(req) {
     return __awaiter(this, void 0, void 0, function* () {
         let id = req.body.id;
@@ -158,7 +157,7 @@ function erase(req) {
             };
             return response;
         }
-        let dataProduct = data[0];
+        let dataProduct = data;
         data = yield (0, productService_1.deleteProduct)(id);
         let response = {
             statusCode: 200,
@@ -175,6 +174,7 @@ function erase(req) {
         return response;
     });
 }
+exports.erase = erase;
 function list() {
     return __awaiter(this, void 0, void 0, function* () {
         let data = yield (0, productService_1.findAllProducts)();
@@ -195,6 +195,7 @@ function list() {
         return response;
     });
 }
+exports.list = list;
 function list2() {
     return __awaiter(this, void 0, void 0, function* () {
         let data = yield (0, productService_1.findAllProducts)(true);
@@ -215,11 +216,12 @@ function list2() {
         return response;
     });
 }
+exports.list2 = list2;
 function register(req) {
     return __awaiter(this, void 0, void 0, function* () {
         let user = req.body.username;
         let data = yield findUserByUsername(user);
-        if (data.length !== 0) {
+        if (data !== null) {
             let response = {
                 statusCode: 401,
                 message: 'Nome de usuário se encontra em uso!',
@@ -231,7 +233,7 @@ function register(req) {
         }
         let email = req.body.email;
         data = yield findUserByUsername(user);
-        if (data.length !== 0) {
+        if (data !== null) {
             let response = {
                 statusCode: 401,
                 message: 'Email informado se encontra em uso!',
@@ -256,6 +258,7 @@ function register(req) {
         return response;
     });
 }
+exports.register = register;
 function update(req) {
     return __awaiter(this, void 0, void 0, function* () {
         const productData = req.body;
@@ -282,7 +285,7 @@ function update(req) {
             };
             return response;
         }
-        productData.id = data[0].id;
+        productData.id = data.id;
         const fields = [];
         const values = [];
         if (productData.title !== undefined && productData.title !== '') {
@@ -306,7 +309,7 @@ function update(req) {
         fields.push('updated_at = CURRENT_TIMESTAMP');
         values.push(productData.id);
         data = yield (0, productService_1.updateProduct)(fields, values, productData.id);
-        data = data[0];
+        data = data;
         let response = {
             statusCode: 200,
             message: 'Produto atualizado com sucesso!',
@@ -321,3 +324,4 @@ function update(req) {
         return response;
     });
 }
+exports.update = update;

@@ -2,6 +2,7 @@ import db from './dbService';
 import { QueryResult } from 'pg';
 
 interface Category {
+  length: number;
   id: number;
   title: string;
   description: string;

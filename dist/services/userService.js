@@ -12,44 +12,62 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.findUserByUsername = exports.findUserByEmail = exports.findAllUsers = exports.createUser = void 0;
 const dbService_1 = __importDefault(require("./dbService"));
-const helper_1 = __importDefault(require("../helpers/helper"));
 function createUser(userData) {
     return __awaiter(this, void 0, void 0, function* () {
-        const sql = "INSERT INTO users (username, email, password) VALUES (?, ?, md5(?))";
+        const sql = "INSERT INTO users (username, email, password) VALUES (?, ?, md5(?)) RETURNING *";
         const values = [userData.username, userData.email, userData.password];
-        const rows = yield dbService_1.default.query(sql, values);
-        const data = helper_1.default.emptyOrRows(rows);
-        return data;
+        try {
+            const { rows } = yield dbService_1.default.query(sql, values);
+            return rows[0] || null;
+        }
+        catch (error) {
+            console.error('Error creating user:', error);
+            return null;
+        }
     });
 }
+exports.createUser = createUser;
 function findAllUsers() {
     return __awaiter(this, void 0, void 0, function* () {
         const sql = "SELECT id, username, password FROM users";
-        const rows = yield dbService_1.default.query(sql);
-        const data = helper_1.default.emptyOrRows(rows);
-        return data;
+        try {
+            const { rows } = yield dbService_1.default.query(sql);
+            return rows;
+        }
+        catch (error) {
+            console.error('Error finding all users:', error);
+            return [];
+        }
     });
 }
+exports.findAllUsers = findAllUsers;
 function findUserByEmail(email) {
     return __awaiter(this, void 0, void 0, function* () {
         const sql = "SELECT id, username, email FROM users WHERE email = ?";
-        const rows = yield dbService_1.default.query(sql, [email]);
-        const data = helper_1.default.emptyOrRows(rows);
-        return data;
+        try {
+            const { rows } = yield dbService_1.default.query(sql, [email]);
+            return rows[0] || null;
+        }
+        catch (error) {
+            console.error('Error finding user by email:', error);
+            return null;
+        }
     });
 }
+exports.findUserByEmail = findUserByEmail;
 function findUserByUsername(username) {
     return __awaiter(this, void 0, void 0, function* () {
         const sql = "SELECT id, username, password FROM users WHERE username = ?";
-        const rows = yield dbService_1.default.query(sql, [username]);
-        const data = helper_1.default.emptyOrRows(rows);
-        return data;
+        try {
+            const { rows } = yield dbService_1.default.query(sql, [username]);
+            return rows[0] || null;
+        }
+        catch (error) {
+            console.error('Error finding user by username:', error);
+            return null;
+        }
     });
 }
-exports.default = {
-    createUser,
-    findAllUsers,
-    findUserByEmail,
-    findUserByUsername
-};
+exports.findUserByUsername = findUserByUsername;

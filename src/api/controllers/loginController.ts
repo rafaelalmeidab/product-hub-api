@@ -1,8 +1,8 @@
 import { Request } from 'express';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import md5 from '../../utils/md5';
-import { createUser, findAllUsers, findUserByEmail, findUserByUsername } from '../../services/userService';
+import * as md5 from '../../utils/md5';
+import { createUser, findUserByEmail, findUserByUsername } from "../../services/userService";
 
 dotenv.config();
 const SECRET = process.env.SECRET as string;
@@ -18,7 +18,7 @@ async function login(req: Request): Promise<Response> {
   let user = req.body.username;
   const data = await findUserByUsername(user);
 
-  if (data.length === 0) {
+  if (data === null) {
     let response: Response = {
       statusCode: 401,
       message: "Usuário não encontrado!",
@@ -30,7 +30,7 @@ async function login(req: Request): Promise<Response> {
     return response;
   }
 
-  const validatePassword = md5.comparePassword(req.body.password, data[0].password);
+  const validatePassword = md5.comparePassword(req.body.password, data.password);
   if (!validatePassword) {
     let response: Response = {
       statusCode: 401,
@@ -40,8 +40,10 @@ async function login(req: Request): Promise<Response> {
     return response;
   }
 
-  const token = jwt.sign({ user: req.body.user, idUser: data[0].id }, SECRET, { expiresIn: "20m" });
-  global.loggedInUserId = data[0].id;
+  const token = jwt.sign({ user: req.body.user, idUser: data.id }, SECRET, { expiresIn: "20m" });
+  
+  global.loggedInUserId = data.id ?? null;
+
   let response: Response = {
     statusCode: 200,
     message: "Login realizado com sucesso!",
@@ -57,7 +59,7 @@ async function register(req: Request): Promise<Response> {
   let user = req.body.username;
   let data = await findUserByUsername(user);
 
-  if (data.length !== 0) {
+  if (data !== null) {
     let response: Response = {
       statusCode: 401,
       message: "Nome de usuário se encontra em uso!",
@@ -72,7 +74,7 @@ async function register(req: Request): Promise<Response> {
   let email = req.body.email;
   data = await findUserByEmail(email);
 
-  if (data.length !== 0) {
+  if (data !== null) {
     let response: Response = {
       statusCode: 401,
       message: "Email informado se encontra em uso!",

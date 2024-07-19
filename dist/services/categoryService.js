@@ -12,12 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addCategory = addCategory;
-exports.deleteCategory = deleteCategory;
-exports.findAllCategories = findAllCategories;
-exports.findCategoryById = findCategoryById;
-exports.findCategoryByTitle = findCategoryByTitle;
-exports.updateCategory = updateCategory;
+exports.updateCategory = exports.findCategoryByTitle = exports.findCategoryById = exports.findAllCategories = exports.deleteCategory = exports.addCategory = void 0;
 const dbService_1 = __importDefault(require("./dbService"));
 function addCategory(categoryData) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -33,6 +28,7 @@ function addCategory(categoryData) {
         }
     });
 }
+exports.addCategory = addCategory;
 function deleteCategory(categoryId) {
     return __awaiter(this, void 0, void 0, function* () {
         const sql = "DELETE FROM categories WHERE id = $1 RETURNING *";
@@ -46,6 +42,7 @@ function deleteCategory(categoryId) {
         }
     });
 }
+exports.deleteCategory = deleteCategory;
 function findAllCategories() {
     return __awaiter(this, void 0, void 0, function* () {
         const sql = "SELECT id, title, description, owner_id, created_at FROM categories";
@@ -59,6 +56,7 @@ function findAllCategories() {
         }
     });
 }
+exports.findAllCategories = findAllCategories;
 function findCategoryById(categoryId) {
     return __awaiter(this, void 0, void 0, function* () {
         const sql = "SELECT id, title, description FROM categories WHERE id = $1";
@@ -72,6 +70,7 @@ function findCategoryById(categoryId) {
         }
     });
 }
+exports.findCategoryById = findCategoryById;
 function findCategoryByTitle(categoryTitle) {
     return __awaiter(this, void 0, void 0, function* () {
         const sql = "SELECT id, title, description FROM categories WHERE title = $1";
@@ -85,6 +84,7 @@ function findCategoryByTitle(categoryTitle) {
         }
     });
 }
+exports.findCategoryByTitle = findCategoryByTitle;
 function updateCategory(categoryData) {
     return __awaiter(this, void 0, void 0, function* () {
         const sql = "UPDATE categories SET title = $1, description = $2, owner_id = $3 WHERE id = $4 RETURNING *";
@@ -99,3 +99,4 @@ function updateCategory(categoryData) {
         }
     });
 }
+exports.updateCategory = updateCategory;

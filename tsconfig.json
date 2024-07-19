@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
+    "incremental": true, // Habilita o caching incremental
+    "outDir": "./dist",
+    "rootDir": "./src",
     "target": "ES6",
     "module": "commonjs",
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "resolveJsonModule": true
+    "esModuleInterop": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "include": ["src/**/*"]
 }

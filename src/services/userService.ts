@@ -8,40 +8,52 @@ interface UserData {
   password: string;
 }
 
-async function createUser(userData: UserData): Promise<any> {
-  const sql = "INSERT INTO users (username, email, password) VALUES (?, ?, md5(?))";
+async function createUser(userData: UserData): Promise<UserData | null> {
+  const sql = "INSERT INTO users (username, email, password) VALUES (?, ?, md5(?)) RETURNING *";
   const values = [userData.username, userData.email, userData.password];
-  const rows = await db.query(sql, values);
-  const data = helper.emptyOrRows(rows);
-    
-  return data;
+  try {
+    const { rows } = await db.query(sql, values);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error creating user:', error);
+    return null;
+  }
 }
 
-async function findAllUsers(): Promise<any> {
+async function findAllUsers(): Promise<UserData[]> {
   const sql = "SELECT id, username, password FROM users";
-  const rows = await db.query(sql);
-  const data = helper.emptyOrRows(rows);
-    
-  return data;
+  try {
+    const { rows } = await db.query(sql);
+    return rows;
+  } catch (error) {
+    console.error('Error finding all users:', error);
+    return [];
+  }
 }
 
-async function findUserByEmail(email: string): Promise<any> {
+async function findUserByEmail(email: string): Promise<UserData | null> {
   const sql = "SELECT id, username, email FROM users WHERE email = ?";
-  const rows = await db.query(sql, [email]);
-  const data = helper.emptyOrRows(rows);
-
-  return data;
+  try {
+    const { rows } = await db.query(sql, [email]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error finding user by email:', error);
+    return null;
+  }
 }
 
-async function findUserByUsername(username: string): Promise<any> {
+async function findUserByUsername(username: string): Promise<UserData | null> {
   const sql = "SELECT id, username, password FROM users WHERE username = ?";
-  const rows = await db.query(sql, [username]);
-  const data = helper.emptyOrRows(rows);
-
-  return data;
+  try {
+    const { rows } = await db.query(sql, [username]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('Error finding user by username:', error);
+    return null;
+  }
 }
 
-export default {
+export {
   createUser,
   findAllUsers,
   findUserByEmail,

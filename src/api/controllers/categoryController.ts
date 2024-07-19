@@ -33,16 +33,16 @@ async function add(req: Request): Promise<Response> {
   }
 
   const title = req.body.title;
-  const data = await findCategoryByTitle(title);
+  var data = await findCategoryByTitle(title);
 
-  if (data.length !== 0) {
+  if (data && data !== null) {
     let response: Response = {
       statusCode: 401,
       message: "Categoria já cadastrada no banco!",
       data: {
-        id: data[0].id,
-        title: data[0].title,
-        description: data[0].description
+        id: data.id,
+        title: data.title,
+        description: data.description
       }
     };
 
@@ -68,7 +68,7 @@ async function erase(req: Request): Promise<Response> {
   const id = req.body.id;
   const data = await findCategoryById(id);
 
-  if (data.length === 0) {
+  if (data === null) {
     let response: Response = {
       statusCode: 401,
       message: "Categoria inexistente!",
@@ -80,16 +80,15 @@ async function erase(req: Request): Promise<Response> {
     return response;
   }
 
-  const dataCategory = data[0];
   await deleteCategory(id);
 
   const response: Response = {
     statusCode: 200,
     message: "Categoria excluída com sucesso!",
     body: {
-      category: dataCategory.id,
-      name: dataCategory.name,
-      description: dataCategory.description
+      category: data.id,
+      title: data.title,
+      description: data.description
     }
   };
 
@@ -99,7 +98,7 @@ async function erase(req: Request): Promise<Response> {
 async function list(): Promise<Response> {
   const data = await findAllCategories();
 
-  if (data.length === 0) {
+  if (data === null) {
     let response: Response = {
       statusCode: 401,
       message: "Não existem categorias cadastradas!"
@@ -145,11 +144,11 @@ async function update(req: Request): Promise<Response> {
   const id = req.body.id;
   const data = await findCategoryById(id);
 
-  if (data.length === 0) {
+  if (data === null) {
     let response: Response = {
       statusCode: 401,
       message: "Categoria inexistente.",
-      data: {
+      body: {
         id: req.body.id,
         title: req.body.title,
         description: req.body.description
@@ -159,18 +158,33 @@ async function update(req: Request): Promise<Response> {
     return response;
   }
 
-  productData.id = data[0].id;
+  productData.id = data.id;
   const updatedData = await updateCategory(productData);
 
-  const response: Response = {
-    statusCode: 200,
-    message: "Categoria atualizada com sucesso!",
-    body: {
-      title: updatedData.title,
-      description: updatedData.description,
-      owner_id: updatedData.owner_id
-    }
-  };
+  if(updatedData && updatedData !== null){
+
+  var response: Response = {
+      statusCode: 200,
+      message: "Categoria atualizada com sucesso!",
+      body: {
+        title: updatedData.title,
+        description: updatedData.description,
+        owner_id: updatedData.owner_id
+      }
+    };
+  }
+  else{
+    var response: Response = {
+      statusCode: 401,
+      message: "Erro ao atualizar categoria!",
+      body: {
+        id: req.body.id,
+        title: req.body.title,
+        description: req.body.description
+      }
+    };
+  }
+
 
   return response;
 }
